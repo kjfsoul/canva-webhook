@@ -1,41 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const WEBHOOK_TOKEN = process.env.CANVA_WEBHOOK_SECRET!; // set in Vercel env
+const WEBHOOK_TOKEN = process.env.CANVA_WEBHOOK_SECRET!;
 
-function isAuthorized(req: NextRequest) {
-  // Canva should send this header/value (you’ll set the same token in Canva portal)
-  const token = req.headers.get("x-canva-token");
-  return token && WEBHOOK_TOKEN && token === WEBHOOK_TOKEN;
+function authorized(req: NextRequest) {
+  const token = req.headers.get("x-canva-token"); // same value you set in Canva
+  return !!WEBHOOK_TOKEN && token === WEBHOOK_TOKEN;
 }
 
 export async function POST(req: NextRequest) {
-  // Read raw text (handy if Canva later adds signature checks)
-  const raw = await req.text();
+  const raw = await req.text(); // read raw for future signatures
+  if (!authorized(req)) return new NextResponse("forbidden", { status: 403 });
 
-  if (!isAuthorized(req)) {
-    return new NextResponse("forbidden", { status: 403 });
-  }
-
-  // Parse body safely
   let evt: any = {};
   try {
     evt = JSON.parse(raw);
-  } catch {
-    /* ignore parse errors */
-  }
-
-  // Do minimal work here; queue heavy work elsewhere (job queue / cron)
-  console.log("CANVA_EVENT", {
-    type: evt?.type,
-    id: evt?.data?.id ?? evt?.id,
-    receivedAt: new Date().toISOString(),
-  });
-
-  // ACK fast so Canva doesn’t retry
-  return new NextResponse(null, { status: 200 });
+  } catch {}
+  console.log("CANVA_EVENT", evt?.type, evt?.data?.id ?? evt?.id);
+  return new NextResponse(null, { status: 200 }); // ACK fast
 }
 
-// Optional: GET for quick health checks yeah
 export async function GET() {
   return NextResponse.json({ ok: true });
 }
