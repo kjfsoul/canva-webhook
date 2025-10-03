@@ -12,7 +12,7 @@ function b64url(b: Buffer) {
 export async function GET() {
   if (!CLIENT_ID) return new Response("Missing CANVA_CLIENT_ID", { status: 500 });
 
-  const verifier = b64url(crypto.randomBytes(32));             // 43 chars typical
+  const verifier = b64url(crypto.randomBytes(32));
   const challenge = b64url(crypto.createHash("sha256").update(verifier).digest());
   const state = b64url(crypto.randomBytes(16));
 
@@ -26,6 +26,6 @@ export async function GET() {
 
   const res = NextResponse.redirect(url.toString());
   res.cookies.set("pkce_verifier", verifier, { httpOnly: true, secure: true, sameSite: "lax", path: "/" });
-  res.cookies.set("oauth_state", state,   { httpOnly: true, secure: true, sameSite: "lax", path: "/" });
+  res.cookies.set("oauth_state", state, { httpOnly: true, secure: true, sameSite: "lax", path: "/" });
   return res;
 }
