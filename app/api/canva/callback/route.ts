@@ -10,9 +10,9 @@ export async function GET(req: NextRequest) {
   const cookieState = req.cookies.get("oauth_state")?.value;
   const verifier = req.cookies.get("pkce_verifier")?.value;
 
-  if (!code || !verifier || state !== cookieState) {
+  if (!CLIENT_ID) return new NextResponse("Missing CANVA_CLIENT_ID", { status: 500 });
+  if (!code || !verifier || state !== cookieState)
     return new NextResponse("invalid oauth response", { status: 400 });
-  }
 
   const r = await fetch(TOKEN_URL, {
     method: "POST",
@@ -32,12 +32,6 @@ export async function GET(req: NextRequest) {
   }
 
   const tokens = await r.json(); // { access_token, refresh_token, expires_in, ... }
-  // TODO: store tokens securely (DB/KV). For now, just show success.
-  return NextResponse.json({
-    ok: true,
-    tokens: {
-      hasAccess: !!tokens.access_token,
-      hasRefresh: !!tokens.refresh_token,
-    },
-  });
+  // TODO: store tokens securely; for now just confirm success minimally
+  return NextResponse.json({ ok: true, tokens: { hasAccess: !!tokens.access_token, hasRefresh: !!tokens.refresh_token } });
 }
