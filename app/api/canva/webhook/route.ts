@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
   return new NextResponse(null, { status: 200 });
 }
 
-// Optional: GET for quick health checks
+// Optional: GET for quick health checks yeah
 export async function GET() {
   return NextResponse.json({ ok: true });
 }
