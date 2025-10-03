@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const TOKEN_URL = "https://www.canva.com/api/oauth/token"\;
+const TOKEN_URL = "https://www.canva.com/api/oauth/token";
 const CLIENT_ID = process.env.CANVA_CLIENT_ID!;
-const REDIRECT_URI = process.env.CANVA_REDIRECT_URI ?? "https://canva-webhook.vercel.app/api/canva/callback"\;
+const REDIRECT_URI = process.env.CANVA_REDIRECT_URI ?? "https://canva-webhook.vercel.app/api/canva/callback";
 
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get("code");

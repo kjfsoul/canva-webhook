@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 
-const CANVA_AUTH = "https://www.canva.com/api/oauth/authorize"\;
+const CANVA_AUTH = "https://www.canva.com/api/oauth/authorize";
 const CLIENT_ID = process.env.CANVA_CLIENT_ID!;
-const REDIRECT_URI = process.env.CANVA_REDIRECT_URI ?? "https://canva-webhook.vercel.app/api/canva/callback"\;
+const REDIRECT_URI = process.env.CANVA_REDIRECT_URI ?? "https://canva-webhook.vercel.app/api/canva/callback";
 
 function b64url(b: Buffer) {
   return b.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
