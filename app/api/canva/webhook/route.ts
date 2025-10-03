@@ -1,10 +1,12 @@
-// app/api/canva/webhook/route.ts
 import { NextRequest, NextResponse } from "next/server";
 
 const WEBHOOK_TOKEN = process.env.CANVA_WEBHOOK_SECRET!;
 
-function authorized(req: NextRequest) {
-  const token = req.headers.get("x-canva-token");
+function isAuthorized(req: NextRequest) {
+  // Prefer header; fall back to query param (?token=...)
+  const headerToken = req.headers.get("x-canva-token");
+  const queryToken = req.nextUrl.searchParams.get("token");
+  const token = headerToken ?? queryToken ?? "";
   return Boolean(WEBHOOK_TOKEN) && token === WEBHOOK_TOKEN;
 }
 
@@ -15,10 +17,9 @@ type CanvaEvent = {
 };
 
 export async function POST(req: NextRequest) {
-  // Read raw body (handy if Canva introduces signatures later)
   const raw = await req.text();
 
-  if (!authorized(req)) {
+  if (!isAuthorized(req)) {
     return new NextResponse("forbidden", { status: 403 });
   }
 
@@ -26,7 +27,7 @@ export async function POST(req: NextRequest) {
   try {
     evt = JSON.parse(raw) as CanvaEvent;
   } catch {
-    // ignore parse errors, still ACK so Canva doesn't retry forever
+    // keep evt null; still ACK so Canva doesn't keep retrying forever
   }
 
   console.log("CANVA_EVENT", {
@@ -35,7 +36,7 @@ export async function POST(req: NextRequest) {
     receivedAt: new Date().toISOString(),
   });
 
-  // Ack fast; handle heavy work asynchronously (queue/db)
+  // Do heavy work async (queue/db) — ACK fast
   return new NextResponse(null, { status: 200 });
 }
 
